@@ -26,11 +26,11 @@ jobs:
         run: |
           set -euo pipefail
           count="$(find .github/source-transfer -maxdepth 1 -type f -name 'part-*' | wc -l)"
-          if [ "$count" -ne 5 ]; then
-            echo "Expected 5 source parts, found $count. Upload all parts before retrying."
+          if [ "$count" -ne 19 ]; then
+            echo "Expected 19 source parts, found $count. Upload all parts before retrying."
             exit 1
           fi
-      - name: Restore source archive
+      - name: Restore and validate source archive
         shell: bash
         run: |
           set -euo pipefail
@@ -39,6 +39,15 @@ jobs:
           unzip -oq "$RUNNER_TEMP/jemor-space-source.zip" -d .
           rm -f "$RUNNER_TEMP/jemor-space-source.zip"
           rm -rf .github/source-transfer
+      - name: Commit full source to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add complete Jémor Space source and feature expansion"
+          git push
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: TypeScript check
@@ -48,12 +57,3 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://khgrlguwegmyzgwwnwhv.supabase.co
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_0K0D7PLvibZQqZI3uVuRCQ_uq2ajiwP
-      - name: Commit full source to main
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Add complete Jémor Space source and verified application features"
-          git push
